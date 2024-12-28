@@ -26,6 +26,11 @@ _sv_nmi_counter:        .byte 0
 .code
 
 reset:
+	nop
+	cld
+	nop
+	sei
+	nop
         jsr     zerobss
 
         ; Initialize data.
