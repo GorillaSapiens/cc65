@@ -12,25 +12,18 @@
         .import         __STACKSIZE__                   ; Linker generated
 
         .include "zeropage.inc"
-        .include "supervision.inc"
 
-        .export _sv_irq_timer_counter, _sv_irq_dma_counter
+        .export _sv_irq_counter
         .export _sv_nmi_counter
 
 .bss
 
-_sv_irq_dma_counter:    .byte 0
-_sv_irq_timer_counter:  .byte 0
+_sv_irq_counter:        .byte 0
 _sv_nmi_counter:        .byte 0
 
 .code
 
-reset:
-	nop
-	cld
-	nop
-	sei
-	nop
+init:
         jsr     zerobss
 
         ; Initialize data.
@@ -45,41 +38,27 @@ reset:
 _exit:  jsr     donelib
 exit:   jmp     exit
 
-
-.proc   irq
-        pha
-        lda     sv_irq_source
-        and     #SV_IRQ_REQUEST_TIMER
-        beq     not_timer
-        lda     sv_timer_quit
-        inc     _sv_irq_timer_counter
-not_timer:
-        lda     sv_irq_source
-        and     #SV_IRQ_REQUEST_DMA
-        beq     not_dma
-        lda     sv_dma_quit
-        inc     _sv_irq_dma_counter
-not_dma:
-        pla
-        rti
-.endproc
-
 .proc   nmi
         inc     _sv_nmi_counter
         rti
 .endproc
 
+.proc   irq
+        inc     _sv_irq_counter
+        rti
+.endproc
+
 ; Removing this segment gives only a warning.
         .segment "FFF0"
-.proc reset32kcode
-        lda     #(6<<5) | SV_LCD_ON | SV_NMI_ENABLE_ON
-        sta     sv_bank
-; Now, the 32Kbyte image can reside in the top of 64Kbyte and 128Kbyte ROMs.
-        jmp     reset
+
+.proc reset
+	cld
+	sei
+
+        jmp     init
 .endproc
 
         .segment "VECTORS"
-
 .word   nmi
-.word   reset32kcode
+.word   reset
 .word   irq

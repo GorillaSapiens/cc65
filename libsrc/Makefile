@@ -15,8 +15,7 @@ CBMS = c128   \
 GEOS = geos-apple \
        geos-cbm
 
-TARGETS = xa28         \
-          apple2       \
+TARGETS = apple2       \
           apple2enh    \
           atari        \
           atarixl      \
@@ -39,7 +38,10 @@ TARGETS = xa28         \
           sim65c02     \
           supervision  \
           sym1         \
-          telestrat
+          telestrat    \
+          xa28
+
+TARGETS = xa28
 
 TARGETTEST = none     \
              sim6502  \
