@@ -23,7 +23,14 @@ _sv_nmi_counter:        .byte 0
 
 .code
 
-init:
+reset:
+	cld ; clear decimal mode
+	sei ; disable interrupts
+
+	; set the CPUSTACK register
+	ldx #$FF
+	txs
+
         jsr     zerobss
 
         ; Initialize data.
@@ -51,14 +58,11 @@ exit:   jmp     exit
 ; Removing this segment gives only a warning.
         .segment "FFF0"
 
-.proc reset
-	cld
-	sei
-
-        jmp     init
+.proc pre_reset
+        jmp     reset
 .endproc
 
         .segment "VECTORS"
 .word   nmi
-.word   reset
+.word   pre_reset
 .word   irq
