@@ -180,6 +180,7 @@ static const TargetEntry TargetMap[] = {
     {   "sym1",         TGT_SYM1         },
     {   "telestrat",    TGT_TELESTRAT    },
     {   "vic20",        TGT_VIC20        },
+    {   "xa28",         TGT_XA28         },
 };
 #define MAP_ENTRY_COUNT         (sizeof (TargetMap) / sizeof (TargetMap[0]))
 
@@ -223,6 +224,7 @@ static const TargetProperties PropertyTable[TGT_COUNT] = {
     { "sym1",           CPU_6502,       BINFMT_BINARY,      CTNone  },
     { "kim1",           CPU_6502,       BINFMT_BINARY,      CTNone  },
     { "rp6502",         CPU_65C02,      BINFMT_BINARY,      CTNone  },
+    { "xa28",           CPU_6502,       BINFMT_BINARY,      CTNone  },
 };
 
 /* Target system */

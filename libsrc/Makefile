@@ -15,7 +15,8 @@ CBMS = c128   \
 GEOS = geos-apple \
        geos-cbm
 
-TARGETS = apple2       \
+TARGETS = xa28         \
+          apple2       \
           apple2enh    \
           atari        \
           atarixl      \
