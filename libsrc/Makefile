@@ -41,7 +41,7 @@ TARGETS = apple2       \
           telestrat    \
           xa28
 
-TARGETS = xa28
+#TARGETS = xa28
 
 TARGETTEST = none     \
              sim6502  \
