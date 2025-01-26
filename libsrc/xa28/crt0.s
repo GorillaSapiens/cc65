@@ -36,8 +36,8 @@ reset:
         ; Initialize data.
         jsr     copydata
 
-        lda     #<(__RAM_START__ + __RAM_SIZE__ + __STACKSIZE__)
-        ldx     #>(__RAM_START__ + __RAM_SIZE__ + __STACKSIZE__)
+        lda     #<(__RAM_START__ + __RAM_SIZE__)
+        ldx     #>(__RAM_START__ + __RAM_SIZE__)
         sta     sp
         stx     sp+1            ; Set argument stack ptr
         jsr     initlib
