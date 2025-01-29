@@ -67,6 +67,7 @@
 #define CF_SHORT        CF_INT  /* Alias */
 #define CF_PTR          CF_INT  /* Alias for readability */
 #define CF_LONG         0x0001  /* Operation on longs */
+#define CF_LONGLONG     0x0000  /* Operation on long longs (???) */
 #define CF_FLOAT        0x0010  /* Operation on a float */
 
 /* Signedness */

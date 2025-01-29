@@ -485,6 +485,22 @@ static void ParseTypeSpec (DeclSpec* Spec, typespec_t TSFlags)
             }
             break;
 
+        case TOK_LONGLONG:
+            NextToken ();
+            if (CurTok.Tok == TOK_UNSIGNED) {
+                Spec->Flags |= DS_EXPLICIT_SIGNEDNESS;
+                NextToken ();
+                OptionalInt ();
+                Spec->Type[0].C = T_ULONGLONG;
+                Spec->Type[1].C = T_END;
+            } else {
+                OptionalSigned (Spec);
+                OptionalInt ();
+                Spec->Type[0].C = T_LONGLONG;
+                Spec->Type[1].C = T_END;
+            }
+            break;
+
         case TOK_SHORT:
             NextToken ();
             if (CurTok.Tok == TOK_UNSIGNED) {
@@ -532,6 +548,13 @@ static void ParseTypeSpec (DeclSpec* Spec, typespec_t TSFlags)
                     Spec->Type[1].C = T_END;
                     break;
 
+                case TOK_LONGLONG:
+                    NextToken ();
+                    OptionalInt ();
+                    Spec->Type[0].C = T_LONGLONG;
+                    Spec->Type[1].C = T_END;
+                    break;
+
                 case TOK_INT:
                     NextToken ();
                     /* FALL THROUGH */
@@ -565,6 +588,13 @@ static void ParseTypeSpec (DeclSpec* Spec, typespec_t TSFlags)
                     NextToken ();
                     OptionalInt ();
                     Spec->Type[0].C = T_ULONG;
+                    Spec->Type[1].C = T_END;
+                    break;
+
+                case TOK_LONGLONG:
+                    NextToken ();
+                    OptionalInt ();
+                    Spec->Type[0].C = T_ULONGLONG;
                     Spec->Type[1].C = T_END;
                     break;
 
