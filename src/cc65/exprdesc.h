@@ -205,7 +205,7 @@ struct ExprDesc {
     unsigned            Flags;          /* Properties of the expression */
     uintptr_t           Name;           /* Name pointer or label number */
     struct SymEntry*    Sym;            /* Symbol table entry if any */
-    long                IVal;           /* Integer value if expression constant */
+    long long           IVal;           /* Integer value if expression constant */
     union {
         Double          FVal;           /* Floating point value */
         struct Literal* LVal;           /* Literal value */

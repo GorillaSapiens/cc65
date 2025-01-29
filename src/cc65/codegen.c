@@ -317,6 +317,9 @@ unsigned sizeofarg (unsigned flags)
         case CF_LONG:
             return 4;
 
+        case CF_LONGLONG:
+            return 8;
+
         case CF_FLOAT:
             return 4;
 
@@ -709,7 +712,7 @@ void g_restore_regvars (int StackOffs, int RegOffs, unsigned Bytes)
 void g_getimmed (unsigned Flags, uintptr_t Val, long Offs)
 /* Load a constant into the primary register */
 {
-    unsigned char B1, B2, B3, B4;
+    unsigned char B1, B2, B3, B4, B5, B6, B7, B8;
 
 
     if ((Flags & CF_CONST) != 0) {
@@ -738,6 +741,36 @@ void g_getimmed (unsigned Flags, uintptr_t Val, long Offs)
                 /* Load the value. Don't be too smart here and let
                  * the optimizer do its job.
                  */
+                AddCodeLine ("lda #$%02X", B4);
+                AddCodeLine ("sta sreg+1");
+                AddCodeLine ("lda #$%02X", B3);
+                AddCodeLine ("sta sreg");
+                AddCodeLine ("lda #$%02X", B1);
+                AddCodeLine ("ldx #$%02X", B2);
+                break;
+
+            case CF_LONGLONG:
+                /* Split the value into 4 bytes */
+                B1 = (unsigned char) (Val >>  0);
+                B2 = (unsigned char) (Val >>  8);
+                B3 = (unsigned char) (Val >> 16);
+                B4 = (unsigned char) (Val >> 24);
+                B5 = (unsigned char) (Val >> 32);
+                B6 = (unsigned char) (Val >> 40);
+                B7 = (unsigned char) (Val >> 48);
+                B8 = (unsigned char) (Val >> 56);
+
+                /* Load the value. Don't be too smart here and let
+                 * the optimizer do its job.
+                 */
+                AddCodeLine ("lda #$%02X", B8);
+                AddCodeLine ("sta sreg+5");
+                AddCodeLine ("lda #$%02X", B7);
+                AddCodeLine ("sta sreg+4");
+                AddCodeLine ("lda #$%02X", B6);
+                AddCodeLine ("sta sreg+3");
+                AddCodeLine ("lda #$%02X", B5);
+                AddCodeLine ("sta sreg+2");
                 AddCodeLine ("lda #$%02X", B4);
                 AddCodeLine ("sta sreg+1");
                 AddCodeLine ("lda #$%02X", B3);
@@ -816,6 +849,34 @@ void g_getstatic (unsigned flags, uintptr_t label, long offs)
             }
             break;
 
+        case CF_LONGLONG:
+            if (flags & CF_TEST) {
+                AddCodeLine ("lda %s+7", lbuf);
+                AddCodeLine ("ora %s+6", lbuf);
+                AddCodeLine ("ora %s+5", lbuf);
+                AddCodeLine ("ora %s+4", lbuf);
+                AddCodeLine ("ora %s+3", lbuf);
+                AddCodeLine ("ora %s+2", lbuf);
+                AddCodeLine ("ora %s+1", lbuf);
+                AddCodeLine ("ora %s+0", lbuf);
+            } else {
+                AddCodeLine ("lda %s+7", lbuf);
+                AddCodeLine ("sta sreg+5");
+                AddCodeLine ("lda %s+6", lbuf);
+                AddCodeLine ("sta sreg+4");
+                AddCodeLine ("lda %s+5", lbuf);
+                AddCodeLine ("sta sreg+3");
+                AddCodeLine ("lda %s+4", lbuf);
+                AddCodeLine ("sta sreg+2");
+                AddCodeLine ("lda %s+3", lbuf);
+                AddCodeLine ("sta sreg+1");
+                AddCodeLine ("lda %s+2", lbuf);
+                AddCodeLine ("sta sreg");
+                AddCodeLine ("ldx %s+1", lbuf);
+                AddCodeLine ("lda %s", lbuf);
+            }
+            break;
+
         default:
             typeerror (flags);
 
@@ -869,6 +930,15 @@ void g_getlocal (unsigned Flags, int Offs)
             }
             break;
 
+        case CF_LONGLONG:
+            CheckLocalOffs (Offs + 7);
+            AddCodeLine ("ldy #$%02X", (unsigned char) (Offs+7));
+            AddCodeLine ("jsr ldeeaxysp");
+            if (Flags & CF_TEST) {
+                g_test (Flags);
+            }
+            break;
+
         default:
             typeerror (Flags);
     }
@@ -917,6 +987,14 @@ void g_getind (unsigned Flags, unsigned Offs)
         case CF_LONG:
             AddCodeLine ("ldy #$%02X", Offs+3);
             AddCodeLine ("jsr ldeaxidx");
+            if (Flags & CF_TEST) {
+                g_test (Flags);
+            }
+            break;
+
+        case CF_LONGLONG:
+            AddCodeLine ("ldy #$%02X", Offs+7);
+            AddCodeLine ("jsr ldeeaxidx");
             if (Flags & CF_TEST) {
                 g_test (Flags);
             }
@@ -1072,6 +1150,23 @@ void g_putstatic (unsigned flags, uintptr_t label, long offs)
             AddCodeLine ("sty %s+3", lbuf);
             break;
 
+        case CF_LONGLONG:
+            AddCodeLine ("sta %s", lbuf);
+            AddCodeLine ("stx %s+1", lbuf);
+            AddCodeLine ("ldy sreg");
+            AddCodeLine ("sty %s+2", lbuf);
+            AddCodeLine ("ldy sreg+1");
+            AddCodeLine ("sty %s+3", lbuf);
+            AddCodeLine ("ldy sreg+2");
+            AddCodeLine ("sty %s+4", lbuf);
+            AddCodeLine ("ldy sreg+3");
+            AddCodeLine ("sty %s+5", lbuf);
+            AddCodeLine ("ldy sreg+4");
+            AddCodeLine ("sty %s+6", lbuf);
+            AddCodeLine ("ldy sreg+5");
+            AddCodeLine ("sty %s+7", lbuf);
+            break;
+
         default:
             typeerror (flags);
 
@@ -1132,6 +1227,14 @@ void g_putlocal (unsigned Flags, int Offs, long Val)
             }
             AddCodeLine ("ldy #$%02X", Offs);
             AddCodeLine ("jsr steaxysp");
+            break;
+
+        case CF_LONGLONG:
+            if (Flags & CF_CONST) {
+                g_getimmed (Flags, Val, 0);
+            }
+            AddCodeLine ("ldy #$%02X", Offs);
+            AddCodeLine ("jsr steeaxysp");
             break;
 
         default:
@@ -1206,6 +1309,10 @@ void g_putind (unsigned Flags, unsigned Offs)
 
         case CF_LONG:
             AddCodeLine ("jsr steaxspidx");
+            break;
+
+        case CF_LONGLONG:
+            AddCodeLine ("jsr steeaxspidx");
             break;
 
         default:

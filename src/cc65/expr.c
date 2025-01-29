@@ -153,6 +153,12 @@ unsigned CG_TypeOf (const Type* T)
         case T_ULONG:
             return CF_LONG | CF_UNSIGNED;
 
+        case T_LONGLONG:
+            return CF_LONGLONG;
+
+        case T_ULONGLONG:
+            return CF_LONGLONG | CF_UNSIGNED;
+
         case T_FLOAT:
         case T_DOUBLE:
             /* These two are identical in the backend */
@@ -313,6 +319,14 @@ void LimitExprValue (ExprDesc* Expr, int WarnOverflow)
 
         case T_ULONG:
             Expr->IVal = (uint32_t)Expr->IVal;
+            break;
+
+        case T_LONGLONG:
+            Expr->IVal = (int64_t)Expr->IVal;
+            break;
+
+        case T_ULONGLONG:
+            Expr->IVal = (uint64_t)Expr->IVal;
             break;
 
         case T_SCHAR:

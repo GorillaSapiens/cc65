@@ -722,6 +722,16 @@ static unsigned ParseVoidInit (Type* T)
                 Size += SIZEOF_LONG;
                 break;
 
+            case T_LONGLONG:
+            case T_ULONGLONG:
+                if (ED_IsConstAbsInt (&Expr)) {
+                    /* Make it dword sized */
+                    Expr.IVal &= 0xFFFFFFFFFFFFFFFF;
+                }
+                DefineData (&Expr);
+                Size += SIZEOF_LONGLONG;
+                break;
+
             default:
                 Error ("Illegal type in initialization");
                 break;
@@ -764,6 +774,8 @@ static unsigned ParseInitInternal (Type* T, int *Braces, int AllowFlexibleMember
         case T_UINT:
         case T_LONG:
         case T_ULONG:
+        case T_LONGLONG:
+        case T_ULONGLONG:
         case T_FLOAT:
         case T_DOUBLE:
             return ParseScalarInit (T);

@@ -129,6 +129,7 @@ static const struct Keyword {
     { "inline",         TOK_INLINE,              TT_C99 | TT_CC65  },
     { "int",            TOK_INT,        TT_C89 | TT_C99 | TT_CC65  },
     { "long",           TOK_LONG,       TT_C89 | TT_C99 | TT_CC65  },
+    { "longlong",       TOK_LONGLONG,                     TT_CC65  },
     { "near",           TOK_NEAR,                         TT_CC65  },
     { "register",       TOK_REGISTER,   TT_C89 | TT_C99 | TT_CC65  },
     { "restrict",       TOK_RESTRICT,            TT_C99 | TT_CC65  },
@@ -155,6 +156,8 @@ static const struct Keyword {
 #define IT_UINT         0x02
 #define IT_LONG         0x04
 #define IT_ULONG        0x08
+#define IT_LONGLONG     0x10
+#define IT_ULONGLONG    0x20
 
 
 /* Internal type for numeric constant scanning.
@@ -612,21 +615,39 @@ static void NumericConst (void)
             /* Unsigned type */
             SB_Skip (&Src);
             if (toupper (SB_Peek (&Src)) != 'L') {
-                Types = IT_UINT | IT_ULONG;
+                Types = IT_UINT | IT_ULONG | IT_ULONGLONG;
             } else {
                 SB_Skip (&Src);
-                Types = IT_ULONG;
+		if (toupper (SB_Peek (&Src)) != 'L') {
+                	Types = IT_ULONG;
+		}
+		else {
+                	SB_Skip (&Src);
+                	Types = IT_ULONGLONG;
+		}
             }
         } else if (toupper (SB_Peek (&Src)) == 'L') {
             /* Long type */
             SB_Skip (&Src);
-            if (toupper (SB_Peek (&Src)) != 'U') {
-                Types = IT_LONG | IT_ULONG;
-                WarnTypes = IT_ULONG;
-            } else {
-                SB_Skip (&Src);
-                Types = IT_ULONG;
-            }
+	    if (toupper (SB_Peek (&Src)) != 'L') {
+		    if (toupper (SB_Peek (&Src)) != 'U') {
+			    Types = IT_LONG | IT_ULONG;
+			    WarnTypes = IT_ULONG;
+		    } else {
+			    SB_Skip (&Src);
+			    Types = IT_ULONG;
+		    }
+	    }
+	    else {
+		    SB_Skip (&Src);
+		    if (toupper (SB_Peek (&Src)) != 'U') {
+			    Types = IT_LONGLONG | IT_ULONGLONG;
+			    WarnTypes = IT_ULONGLONG;
+		    } else {
+			    SB_Skip (&Src);
+			    Types = IT_ULONGLONG;
+		    }
+	    }
         } else {
             if (SB_Peek (&Src) != '\0') {
                 Error ("Invalid suffix \"%s\" on integer constant",

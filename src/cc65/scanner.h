@@ -92,6 +92,7 @@ typedef enum token_t {
     TOK_DOUBLE,
     TOK_FLOAT,
     TOK_LONG,
+    TOK_LONGLONG,
     TOK_UNSIGNED,
     TOK_SIGNED,
     TOK_SHORT,
