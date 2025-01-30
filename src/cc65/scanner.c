@@ -346,6 +346,9 @@ static int ParseChar (void)
             case 'b':
                 C = '\b';
                 break;
+            case 'e':
+                C = '\e';
+                break;
             case 'f':
                 C = '\f';
                 break;
