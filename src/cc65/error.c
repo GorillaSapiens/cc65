@@ -108,6 +108,7 @@ static WarnMapEntry WarnMap[] = {
     { &WarnUnusedParam,         "unused-param"          },
     { &WarnUnusedVar,           "unused-var"            },
     { &WarnConstOverflow,       "const-overflow"        },
+    { &WarnEnable,              "warn-enable"           },
 };
 
 Collection DiagnosticStrBufs;
