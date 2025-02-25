@@ -38,7 +38,10 @@ TARGETS = apple2       \
           sim65c02     \
           supervision  \
           sym1         \
-          telestrat
+          telestrat    \
+          xa28
+
+#TARGETS = xa28
 
 TARGETTEST = none     \
              sim6502  \
