@@ -539,6 +539,16 @@ INLINE int IsRankLong (const Type* T)
 #endif
 
 #if defined(HAVE_INLINE)
+INLINE int IsRankLongLong (const Type* T)
+/* Return true if this is a long int type (signed or unsigned) */
+{
+    return (GetTypeRank (T) == T_RANK_LONGLONG);
+}
+#else
+#  define IsRankLongLong(T)         (GetTypeRank (T) == T_RANK_LONGLONG)
+#endif
+
+#if defined(HAVE_INLINE)
 INLINE int IsDeclTypeChar (const Type* T)
 /* Return true if this is declared as a char type (without signed/unsigned).
 ** This function is to exclude enums whose underlying type is char.

@@ -82,7 +82,7 @@
 
 
 
-static void typeerror (unsigned type)
+static void my_typeerror (unsigned type)
 /* Print an error message about an invalid operand type */
 {
     /* Special handling for floats here: */
@@ -92,6 +92,7 @@ static void typeerror (unsigned type)
         Internal ("Invalid type in CF flags: %04X, type = %u", type, type & CF_TYPEMASK);
     }
 }
+#define typeerror(x) do { printf("%s:%d\n", __FILE__, __LINE__); my_typeerror(x); } while (0)
 
 
 
@@ -1350,6 +1351,43 @@ void g_toslong (unsigned flags)
         case CF_LONG:
             break;
 
+        case CF_LONGLONG: // TODO FIX verify this is the right thing to do here
+            break;
+
+        default:
+            typeerror (flags);
+    }
+}
+
+
+
+void g_toslonglong (unsigned flags)
+/* Make sure, the value on TOS is a longlong. Convert if necessary */
+{
+    switch (flags & CF_TYPEMASK) {
+
+        case CF_CHAR:
+        case CF_INT:
+            if (flags & CF_UNSIGNED) {
+                AddCodeLine ("jsr tosulonglong");
+            } else {
+                AddCodeLine ("jsr toslonglong");
+            }
+            push (CF_INT);
+            break;
+
+        case CF_LONG:
+            if (flags & CF_UNSIGNED) {
+                AddCodeLine ("jsr eaxtosulonglong");
+            } else {
+                AddCodeLine ("jsr eaxtoslonglong");
+            }
+            push (CF_LONG);
+            break;
+
+        case CF_LONGLONG: // TODO FIX verify this is the right thing to do here
+            break;
+
         default:
             typeerror (flags);
     }
@@ -1367,6 +1405,7 @@ void g_tosint (unsigned flags)
             break;
 
         case CF_LONG:
+        case CF_LONGLONG: // TODO FIX verify this is correct thing to do here
             AddCodeLine ("jsr tosint");
             pop (CF_INT);
             break;
@@ -1426,6 +1465,7 @@ void g_regint (unsigned from)
 
         case CF_INT:
         case CF_LONG:
+        case CF_LONGLONG: // TODO FIX verify this is correct thing to do here
             break;
 
         default:
@@ -1485,6 +1525,81 @@ void g_reglong (unsigned from)
             break;
 
         case CF_LONG:
+        case CF_LONGLONG: // TODO FIX verify this is correct thing to do here
+            break;
+
+        default:
+            typeerror (from);
+    }
+}
+
+
+
+void g_reglonglong (unsigned from)
+/* Convert the value in the primary register to a long (whose representation
+** is irrelevent of signedness).
+*/
+{
+    switch (from & CF_TYPEMASK) {
+
+        case CF_CHAR:
+            /* If the original value was forced to use only A, it must be
+            ** extended from char to long. Otherwise AX would already have
+            ** the correct int value to be extened to long.
+            */
+            if (from & CF_FORCECHAR) {
+                /* Conversion is from char */
+                if (from & CF_UNSIGNED) {
+                    if (IS_Get (&CodeSizeFactor) >= 200) {
+                        AddCodeLine ("ldx #$00");
+                        AddCodeLine ("stx sreg");
+                        AddCodeLine ("stx sreg+1");
+                    } else {
+                        AddCodeLine ("jsr aulonglong");
+                    }
+                } else {
+                    if (IS_Get (&CodeSizeFactor) >= 366) {
+                        g_regint (from);
+                        AddCodeLine ("stx sreg");
+                        AddCodeLine ("stx sreg+1");
+                    } else {
+                        AddCodeLine ("jsr alonglong");
+                    }
+                }
+                break;
+            }
+            /* FALLTHROUGH */
+
+        case CF_INT:
+            if (from & CF_UNSIGNED) {
+                if (IS_Get (&CodeSizeFactor) >= 200) {
+                    AddCodeLine ("ldy #$00");
+                    AddCodeLine ("sty sreg");
+                    AddCodeLine ("sty sreg+1");
+                } else {
+                    AddCodeLine ("jsr axulonglong");
+                }
+            } else {
+                AddCodeLine ("jsr axlonglong");
+            }
+            break;
+
+        case CF_LONG:
+            if (from & CF_UNSIGNED) {
+                if (IS_Get (&CodeSizeFactor) >= 200) {
+                    AddCodeLine ("ldy #$00");
+                    AddCodeLine ("sty sreg");
+                    AddCodeLine ("sty sreg+1");
+                    // TODO FIX verify this!!!
+                } else {
+                    AddCodeLine ("jsr eaxulonglong");
+                }
+            } else {
+                AddCodeLine ("jsr eaxlonglong");
+            }
+            break;
+
+        case CF_LONGLONG: // TODO FIX verify this is correct thing to do here
             break;
 
         default:
@@ -1537,7 +1652,18 @@ unsigned g_typeadjust (unsigned lhs, unsigned rhs)
     unsigned rtype = rhs & CF_TYPEMASK;
 
     /* Check if a conversion is needed */
-    if (ltype == CF_LONG && rtype != CF_LONG && (rhs & CF_CONST) == 0) {
+    if (ltype == CF_LONGLONG && rtype != CF_LONGLONG && (rhs & CF_CONST) == 0) {
+        /* We must promote the primary register to longlong */
+        g_reglonglong (rhs);
+    } else if (ltype != CF_LONGLONG && (lhs & CF_CONST) == 0 && rtype == CF_LONGLONG) {
+        /* We must promote the lhs to longlong */
+        if (lhs & CF_PRIMARY) {
+            g_reglonglong (lhs);
+        } else {
+            g_toslonglong (lhs);
+        }
+    }
+    else if (ltype == CF_LONG && rtype != CF_LONG && (rhs & CF_CONST) == 0) {
         /* We must promote the primary register to long */
         g_reglong (rhs);
     } else if (ltype != CF_LONG && (lhs & CF_CONST) == 0 && rtype == CF_LONG) {
@@ -1582,6 +1708,21 @@ unsigned g_typeadjust (unsigned lhs, unsigned rhs)
     ltype = lhs & CF_TYPEMASK;
     rtype = rhs & CF_TYPEMASK;
 
+    /* If either operand has type unsigned longlong int, the other operand is converted to
+    ** unsigned longlong int.
+    */
+    if ((ltype == CF_LONGLONG && (lhs & CF_UNSIGNED)) ||
+        (rtype == CF_LONGLONG && (rhs & CF_UNSIGNED))) {
+        return const_flag | CF_UNSIGNED | CF_LONGLONG;
+    }
+
+    /* see "Otherwise" comment below */
+    if ((ltype == CF_LONGLONG && rtype != CF_LONGLONG && (rhs & CF_UNSIGNED)) ||
+        (rtype == CF_LONGLONG && ltype != CF_LONGLONG && (lhs & CF_UNSIGNED))) {
+        /* long can represent all unsigneds, so we are in the first sub-case. */
+        return const_flag | CF_LONGLONG;
+    }
+
     /* If either operand has type unsigned long int, the other operand is converted to
     ** unsigned long int.
     */
@@ -1590,13 +1731,17 @@ unsigned g_typeadjust (unsigned lhs, unsigned rhs)
         return const_flag | CF_UNSIGNED | CF_LONG;
     }
 
+    if (ltype == CF_LONGLONG || rtype == CF_LONGLONG) {
+        return const_flag | CF_LONGLONG;
+    }
+
     /* Otherwise, if one operand has type long int and the other has type unsigned int,
     ** if a long int can represent all values of an unsigned int, the operand of type unsigned int
     ** is converted to long int ; if a long int cannot represent all the values of an unsigned int,
     ** both operands are converted to unsigned long int.
     */
-    if ((ltype == CF_LONG && rtype == CF_INT && (rhs & CF_UNSIGNED)) ||
-        (rtype == CF_LONG && ltype == CF_INT && (rhs & CF_UNSIGNED))) {
+    if ((ltype == CF_LONG && rtype != CF_LONG && (rhs & CF_UNSIGNED)) ||
+        (rtype == CF_LONG && ltype != CF_LONG && (lhs & CF_UNSIGNED))) {
         /* long can represent all unsigneds, so we are in the first sub-case. */
         return const_flag | CF_LONG;
     }
@@ -1633,6 +1778,11 @@ unsigned g_typecast (unsigned to, unsigned from)
     /* Check if a conversion is needed */
     if ((from & CF_CONST) == 0) {
         switch (to & CF_TYPEMASK) {
+
+            case CF_LONGLONG:
+                /* We must promote the primary register to longlong in EEAX */
+                g_reglonglong (from);
+                break;
 
             case CF_LONG:
                 /* We must promote the primary register to long in EAX */
@@ -2551,6 +2701,10 @@ void g_push (unsigned flags, unsigned long val)
 
             case CF_LONG:
                 AddCodeLine ("jsr pusheax");
+                break;
+
+            case CF_LONGLONG:
+                AddCodeLine ("jsr pusheeax");
                 break;
 
             default:
@@ -3772,6 +3926,15 @@ void g_inc (unsigned flags, unsigned long val)
             if (val <= 255) {
                 AddCodeLine ("ldy #$%02X", (unsigned char) val);
                 AddCodeLine ("jsr inceaxy");
+            } else {
+                g_add (flags | CF_CONST, val);
+            }
+            break;
+
+        case CF_LONGLONG:
+            if (val <= 255) {
+                AddCodeLine ("ldy #$%02X", (unsigned char) val);
+                AddCodeLine ("jsr inceeaxy");
             } else {
                 g_add (flags | CF_CONST, val);
             }

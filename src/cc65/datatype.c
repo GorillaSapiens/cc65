@@ -681,45 +681,35 @@ const Type* ArithmeticConvert (const Type* lhst, const Type* rhst)
     lhst = IntPromotion (lhst);
     rhst = IntPromotion (rhst);
 
-    /* If either operand has type unsigned long int, the other operand is converted to
-    ** unsigned long int.
-    */
-    if ((IsRankLong (lhst) && IsSignUnsigned (lhst)) ||
-        (IsRankLong (rhst) && IsSignUnsigned (rhst))) {
-        return type_ulong;
+    if (IsRankLongLong(lhst) || IsRankLongLong(rhst)) {
+        /* result will be some kind of longlong */
+        if ((IsRankLongLong(lhst) && IsSignUnsigned(lhst)) ||
+            (IsRankLongLong(rhst) && IsSignUnsigned(rhst))) {
+            return type_ulonglong;
+        }
+        return type_longlong;
     }
 
-    /* Otherwise, if one operand has type long int and the other has type unsigned int,
-    ** if a long int can represent all values of an unsigned int, the operand of type unsigned int
-    ** is converted to long int ; if a long int cannot represent all the values of an unsigned int,
-    ** both operands are converted to unsigned long int.
-    */
-    if ((IsRankLong (lhst) && IsRankInt (rhst) && IsSignUnsigned (rhst)) ||
-        (IsRankLong (rhst) && IsRankInt (lhst) && IsSignUnsigned (lhst))) {
-        /* long can represent all unsigneds, so we are in the first sub-case. */
+    if (IsRankLong(lhst) || IsRankLong(rhst)) {
+        /* result will be some kind of long */
+        if ((IsRankLong(lhst) && IsSignUnsigned(lhst)) ||
+            (IsRankLong(rhst) && IsSignUnsigned(rhst))) {
+            return type_ulong;
+        }
         return type_long;
     }
 
-    /* Otherwise, if either operand has type long int, the other operand is converted to long int.
-    */
-    if (IsRankLong (lhst) || IsRankLong (rhst)) {
-        return type_long;
+    if (IsRankInt(lhst) || IsRankInt(rhst)) {
+        /* result will be some kind of int */
+        if ((IsRankInt(lhst) && IsSignUnsigned(lhst)) ||
+            (IsRankInt(rhst) && IsSignUnsigned(rhst))) {
+            return type_uint;
+        }
+        return type_int;
     }
 
-    /* Otherwise, if either operand has type unsigned int, the other operand is converted to
-    ** unsigned int.
-    */
-    if ((IsRankInt (lhst) && IsSignUnsigned (lhst)) ||
-        (IsRankInt (rhst) && IsSignUnsigned (rhst))) {
-        return type_uint;
-    }
-
-    /* Otherwise, both operands have type int. */
-    CHECK (IsRankInt (lhst));
-    CHECK (IsSignSigned (lhst));
-    CHECK (IsRankInt (rhst));
-    CHECK (IsSignSigned (rhst));
-    return type_int;
+    CHECK (0);
+    return type_int; /* above assert means we never get here */
 }
 
 

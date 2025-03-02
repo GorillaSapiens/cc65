@@ -163,7 +163,7 @@ static const struct Keyword {
 /* Internal type for numeric constant scanning.
 ** Size must be explicit for cross-platform uniformity.
 */
-typedef uint32_t scan_t;
+typedef uint64_t scan_t;
 
 
 /*****************************************************************************/
