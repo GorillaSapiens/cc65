@@ -35,6 +35,7 @@
 
 #include <limits.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 
@@ -446,7 +447,8 @@ static void ParseTypeSpec (DeclSpec* Spec, typespec_t TSFlags)
     ident       Ident;
     SymEntry*   TagEntry;
     TypeCode    Qualifiers = T_QUAL_NONE;
-
+    bool        DoubleLongFlag = false;
+    
     /* Assume we have an explicitly specified type */
     Spec->Flags = (Spec->Flags & ~DS_TYPE_MASK) | DS_EXPLICIT_TYPE;
 
@@ -471,16 +473,20 @@ static void ParseTypeSpec (DeclSpec* Spec, typespec_t TSFlags)
 
         case TOK_LONG:
             NextToken ();
+            if (CurTok.Tok == TOK_LONG) {
+                DoubleLongFlag = true;
+                NextToken();
+            }
             if (CurTok.Tok == TOK_UNSIGNED) {
                 Spec->Flags |= DS_EXPLICIT_SIGNEDNESS;
                 NextToken ();
                 OptionalInt ();
-                Spec->Type[0].C = T_ULONG;
+                Spec->Type[0].C = DoubleLongFlag ? T_ULONGLONG : T_ULONG;
                 Spec->Type[1].C = T_END;
             } else {
                 OptionalSigned (Spec);
                 OptionalInt ();
-                Spec->Type[0].C = T_LONG;
+                Spec->Type[0].C = DoubleLongFlag ? T_LONGLONG : T_LONG;
                 Spec->Type[1].C = T_END;
             }
             break;
@@ -543,8 +549,12 @@ static void ParseTypeSpec (DeclSpec* Spec, typespec_t TSFlags)
 
                 case TOK_LONG:
                     NextToken ();
+                    if (CurTok.Tok == TOK_LONG) {
+                        DoubleLongFlag = true;
+                        NextToken();
+                    }
                     OptionalInt ();
-                    Spec->Type[0].C = T_LONG;
+                    Spec->Type[0].C = DoubleLongFlag ? T_LONGLONG : T_LONG;
                     Spec->Type[1].C = T_END;
                     break;
 
@@ -586,8 +596,12 @@ static void ParseTypeSpec (DeclSpec* Spec, typespec_t TSFlags)
 
                 case TOK_LONG:
                     NextToken ();
+                    if (CurTok.Tok == TOK_LONG) {
+                        DoubleLongFlag = true;
+                        NextToken();
+                    }
                     OptionalInt ();
-                    Spec->Type[0].C = T_ULONG;
+                    Spec->Type[0].C = DoubleLongFlag ? T_ULONGLONG : T_ULONG;
                     Spec->Type[1].C = T_END;
                     break;
 
