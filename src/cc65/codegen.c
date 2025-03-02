@@ -1900,6 +1900,7 @@ void g_addlocal (unsigned flags, int offs)
             g_add (flags, 0);
             break;
 
+        case CF_LONGLONG:// TODO FIX!!! fallthrough for now
         default:
             typeerror (flags);
 
@@ -1944,6 +1945,7 @@ void g_addstatic (unsigned flags, uintptr_t label, long offs)
             g_add (flags, 0);
             break;
 
+        case CF_LONGLONG:// TODO FIX!!! fallthrough for now
         default:
             typeerror (flags);
 
@@ -2072,6 +2074,7 @@ void g_addeqstatic (unsigned flags, uintptr_t label, long offs,
             }
             break;
 
+        case CF_LONGLONG:// TODO FIX!!! fallthrough for now
         default:
             typeerror (flags);
     }
@@ -2147,6 +2150,7 @@ void g_addeqlocal (unsigned flags, int Offs, unsigned long val)
             AddCodeLine ("jsr laddeqysp");
             break;
 
+        case CF_LONGLONG:// TODO FIX!!! fallthrough for now
         default:
             typeerror (flags);
     }
@@ -2186,6 +2190,7 @@ void g_addeqind (unsigned flags, unsigned offs, unsigned long val)
             g_putind (flags, offs);             /* Store the value back */
             break;
 
+        case CF_LONGLONG:// TODO FIX!!! fallthrough for now
         default:
             typeerror (flags);
     }
@@ -2324,6 +2329,7 @@ void g_subeqstatic (unsigned flags, uintptr_t label, long offs,
             }
             break;
 
+        case CF_LONGLONG:// TODO FIX!!! fallthrough for now
         default:
             typeerror (flags);
     }
@@ -2381,6 +2387,7 @@ void g_subeqlocal (unsigned flags, int Offs, unsigned long val)
             AddCodeLine ("jsr lsubeqysp");
             break;
 
+        case CF_LONGLONG:// TODO FIX!!! fallthrough for now
         default:
             typeerror (flags);
     }
@@ -2420,6 +2427,7 @@ void g_subeqind (unsigned flags, unsigned offs, unsigned long val)
             g_putind (flags, offs);             /* Store the value back */
             break;
 
+        case CF_LONGLONG:// TODO FIX!!! fallthrough for now
         default:
             typeerror (flags);
     }
@@ -2522,6 +2530,7 @@ void g_save (unsigned flags)
             AddCodeLine ("jsr saveeax");
             break;
 
+        case CF_LONGLONG:// TODO FIX!!! fallthrough for now
         default:
             typeerror (flags);
     }
@@ -2551,6 +2560,7 @@ void g_restore (unsigned flags)
             AddCodeLine ("jsr resteax");
             break;
 
+        case CF_LONGLONG:// TODO FIX!!! fallthrough for now
         default:
             typeerror (flags);
     }
@@ -2587,6 +2597,7 @@ void g_cmp (unsigned flags, unsigned long val)
             Internal ("g_cmp: Long compares not implemented");
             break;
 
+        case CF_LONGLONG:// TODO FIX!!! fallthrough for now
         default:
             typeerror (flags);
     }
@@ -2595,11 +2606,13 @@ void g_cmp (unsigned flags, unsigned long val)
 
 
 static void oper (unsigned Flags, unsigned long Val, const char* const* Subs)
-/* Encode a binary operation. subs is a pointer to four strings:
+/* Encode a binary operation. subs is a pointer to six strings:
 **      0       --> Operate on ints
 **      1       --> Operate on unsigneds
 **      2       --> Operate on longs
 **      3       --> Operate on unsigned longs
+**      4       --> Operate on long longs
+**      5       --> Operate on unsigned long longs
 */
 {
     /* Determine the offset into the array */
@@ -2608,6 +2621,9 @@ static void oper (unsigned Flags, unsigned long Val, const char* const* Subs)
     }
     if ((Flags & CF_TYPEMASK) == CF_LONG) {
         Subs += 2;
+    }
+    if ((Flags & CF_TYPEMASK) == CF_LONGLONG) {
+        Subs += 4;
     }
 
     /* Load the value if it is not already in the primary */
@@ -2650,6 +2666,14 @@ void g_test (unsigned flags)
             }
             break;
 
+        case CF_LONGLONG:
+            if (flags & CF_UNSIGNED) {
+                AddCodeLine ("jsr utsteeax");
+            } else {
+                AddCodeLine ("jsr tsteeax");
+            }
+            break;
+
         default:
             typeerror (flags);
 
@@ -2677,7 +2701,7 @@ void g_push (unsigned flags, unsigned long val)
             AddCodeLine ("jsr pushax");
         }
 
-    } else {
+    } else { // TODO FIX add long long handling
 
         /* Value is not 16 bit or not constant */
         if (flags & CF_CONST) {
@@ -2734,6 +2758,10 @@ void g_swap (unsigned flags)
 
         case CF_LONG:
             AddCodeLine ("jsr swapestk");
+            break;
+
+        case CF_LONGLONG:
+            AddCodeLine ("jsr swapeestk");
             break;
 
         default:
@@ -2916,8 +2944,10 @@ void g_stackcheck (void)
 void g_add (unsigned flags, unsigned long val)
 /* Primary = TOS + Primary */
 {
-    static const char* const ops[4] = {
-        "tosaddax", "tosaddax", "tosaddeax", "tosaddeax"
+    static const char* const ops[6] = {
+        "tosaddax", "tosaddax",
+        "tosaddeax", "tosaddeax",
+        "tosaddeeax", "tosaddeeax"
     };
 
     if (flags & CF_CONST) {
@@ -2932,8 +2962,10 @@ void g_add (unsigned flags, unsigned long val)
 void g_sub (unsigned flags, unsigned long val)
 /* Primary = TOS - Primary */
 {
-    static const char* const ops[4] = {
-        "tossubax", "tossubax", "tossubeax", "tossubeax"
+    static const char* const ops[6] = {
+        "tossubax", "tossubax",
+        "tossubeax", "tossubeax",
+        "tossubeeax", "tossubeeax"
     };
 
     if (flags & CF_CONST) {
@@ -2948,8 +2980,10 @@ void g_sub (unsigned flags, unsigned long val)
 void g_rsub (unsigned flags, unsigned long val)
 /* Primary = Primary - TOS */
 {
-    static const char* const ops[4] = {
-        "tosrsubax", "tosrsubax", "tosrsubeax", "tosrsubeax"
+    static const char* const ops[6] = {
+        "tosrsubax", "tosrsubax",
+        "tosrsubeax", "tosrsubeax",
+        "tosrsubeeax", "tosrsubeeax"
     };
     oper (flags, val, ops);
 }
@@ -2959,8 +2993,10 @@ void g_rsub (unsigned flags, unsigned long val)
 void g_mul (unsigned flags, unsigned long val)
 /* Primary = TOS * Primary */
 {
-    static const char* const ops[4] = {
-        "tosmulax", "tosumulax", "tosmuleax", "tosumuleax"
+    static const char* const ops[6] = {
+        "tosmulax", "tosumulax",
+        "tosmuleax", "tosumuleax",
+        "tosmuleeax", "tosumuleeax"
     };
 
     /* Do strength reduction if the value is constant and a power of two */
@@ -3068,6 +3104,7 @@ void g_mul (unsigned flags, unsigned long val)
                 break;
 
             case CF_LONG:
+            case CF_LONGLONG: // TODO FIX is this even remotely right ???
                 break;
 
             default:
@@ -3091,8 +3128,10 @@ void g_mul (unsigned flags, unsigned long val)
 void g_div (unsigned flags, unsigned long val)
 /* Primary = TOS / Primary */
 {
-    static const char* const ops[4] = {
-        "tosdivax", "tosudivax", "tosdiveax", "tosudiveax"
+    static const char* const ops[6] = {
+        "tosdivax", "tosudivax",
+        "tosdiveax", "tosudiveax",
+        "tosdiveeax", "tosudiveeax"
     };
 
     /* Do strength reduction if the value is constant and a power of two */
@@ -3140,6 +3179,12 @@ void g_div (unsigned flags, unsigned long val)
                 case CF_LONG:
                     MaskedVal &= 0xFFFFFFFF;
                     AddCodeLine ("ldy sreg+1");
+                    AddCodeLine ("bpl %s", LocalLabelName (DoShiftLabel));
+                    break;
+
+                case CF_LONGLONG:
+                    MaskedVal &= 0xFFFFFFFFFFFFFFFF;
+                    AddCodeLine ("ldy sreg+1"); // TODO FIX who knows what to do here???
                     AddCodeLine ("bpl %s", LocalLabelName (DoShiftLabel));
                     break;
 
@@ -3202,8 +3247,10 @@ void g_div (unsigned flags, unsigned long val)
 void g_mod (unsigned flags, unsigned long val)
 /* Primary = TOS % Primary */
 {
-    static const char* const ops[4] = {
-        "tosmodax", "tosumodax", "tosmodeax", "tosumodeax"
+    static const char* const ops[6] = {
+        "tosmodax", "tosumodax",
+        "tosmodeax", "tosumodeax",
+        "tosmodeeax", "tosumodeeax"
     };
     int p2;
 
@@ -3227,8 +3274,10 @@ void g_mod (unsigned flags, unsigned long val)
 void g_or (unsigned flags, unsigned long val)
 /* Primary = TOS | Primary */
 {
-    static const char* const ops[4] = {
-        "tosorax", "tosorax", "tosoreax", "tosoreax"
+    static const char* const ops[6] = {
+        "tosorax", "tosorax",
+        "tosoreax", "tosoreax",
+        "tosoreeax", "tosoreeax"
     };
 
     /* If the right hand side is const, the lhs is not on stack but still
@@ -3268,6 +3317,7 @@ void g_or (unsigned flags, unsigned long val)
                 return;
 
             case CF_LONG:
+            case CF_LONGLONG: // TODO FIX like this too ???
                 if (val <= 0xFF) {
                     if ((val & 0xFF) != 0) {
                         AddCodeLine ("ora #$%02X", (unsigned char)val);
@@ -3297,8 +3347,10 @@ void g_or (unsigned flags, unsigned long val)
 void g_xor (unsigned flags, unsigned long val)
 /* Primary = TOS ^ Primary */
 {
-    static const char* const ops[4] = {
-        "tosxorax", "tosxorax", "tosxoreax", "tosxoreax"
+    static const char* const ops[6] = {
+        "tosxorax", "tosxorax",
+        "tosxoreax", "tosxoreax",
+        "tosxoreeax", "tosxoreeax"
     };
 
 
@@ -3335,6 +3387,7 @@ void g_xor (unsigned flags, unsigned long val)
                 }
                 return;
 
+            case CF_LONGLONG: // TODO FIX is this right???
             case CF_LONG:
                 if (val <= 0xFF) {
                     if (val != 0) {
@@ -3365,8 +3418,10 @@ void g_xor (unsigned flags, unsigned long val)
 void g_and (unsigned Flags, unsigned long Val)
 /* Primary = TOS & Primary */
 {
-    static const char* const ops[4] = {
-        "tosandax", "tosandax", "tosandeax", "tosandeax"
+    static const char* const ops[6] = {
+        "tosandax", "tosandax",
+        "tosandeax", "tosandeax",
+        "tosandeeax", "tosandeeax"
     };
 
     /* If the right hand side is const, the lhs is not on stack but still
@@ -3436,6 +3491,32 @@ void g_and (unsigned Flags, unsigned long Val)
                 }
                 break;
 
+            case CF_LONGLONG: // TODO FIX i think this is ok?
+                if (Val <= 0xFF) {
+                    AddCodeLine ("ldx #$00");
+                    AddCodeLine ("stx sreg+5");
+                    AddCodeLine ("stx sreg+4");
+                    AddCodeLine ("stx sreg+3");
+                    AddCodeLine ("stx sreg+2");
+                    AddCodeLine ("stx sreg+1");
+                    AddCodeLine ("stx sreg");
+                    if ((Val & 0xFF) != 0xFF) {
+                         AddCodeLine ("and #$%02X", (unsigned char)Val);
+                    }
+                    return;
+                } else if (Val == 0xFF00) {
+                    AddCodeLine ("lda #$00");
+                    AddCodeLine ("sta sreg+5");
+                    AddCodeLine ("sta sreg+4");
+                    AddCodeLine ("sta sreg+3");
+                    AddCodeLine ("sta sreg+2");
+                    AddCodeLine ("sta sreg+1");
+                    AddCodeLine ("sta sreg");
+                    return;
+                }
+                break;
+
+
             default:
                 typeerror (Flags);
         }
@@ -3457,8 +3538,10 @@ void g_and (unsigned Flags, unsigned long Val)
 void g_asr (unsigned flags, unsigned long val)
 /* Primary = TOS >> Primary */
 {
-    static const char* const ops[4] = {
-        "tosasrax", "tosshrax", "tosasreax", "tosshreax"
+    static const char* const ops[6] = {
+        "tosasrax", "tosshrax",
+        "tosasreax", "tosshreax",
+        "tosasreeax", "tosshreeax"
     };
 
     /* If the right hand side is const, the lhs is not on stack, but still
@@ -3639,8 +3722,10 @@ void g_asr (unsigned flags, unsigned long val)
 void g_asl (unsigned flags, unsigned long val)
 /* Primary = TOS << Primary */
 {
-    static const char* const ops[4] = {
-        "tosaslax", "tosshlax", "tosasleax", "tosshleax"
+    static const char* const ops[6] = {
+        "tosaslax", "tosshlax",
+        "tosasleax", "tosshleax",
+        "tosasleeax", "tosshleeax"
     };
 
     /* If the right hand side is const, the lhs is not on stack, but still
@@ -4051,8 +4136,10 @@ void g_dec (unsigned flags, unsigned long val)
 void g_eq (unsigned flags, unsigned long val)
 /* Test for equal */
 {
-    static const char* const ops[4] = {
-        "toseqax", "toseqax", "toseqeax", "toseqeax"
+    static const char* const ops[6] = {
+        "toseqax", "toseqax",
+        "toseqeax", "toseqeax",
+        "toseqeeax", "toseqeeax"
     };
 
     unsigned L;
@@ -4105,8 +4192,10 @@ void g_eq (unsigned flags, unsigned long val)
 void g_ne (unsigned flags, unsigned long val)
 /* Test for not equal */
 {
-    static const char* const ops[4] = {
-        "tosneax", "tosneax", "tosneeax", "tosneeax"
+    static const char* const ops[6] = {
+        "tosneax", "tosneax",
+        "tosneeax", "tosneeax",
+        "tosneeeax", "tosneeeax"
     };
 
     unsigned L;
@@ -4159,8 +4248,10 @@ void g_ne (unsigned flags, unsigned long val)
 void g_lt (unsigned flags, unsigned long val)
 /* Test for less than */
 {
-    static const char* const ops[4] = {
-        "tosltax", "tosultax", "toslteax", "tosulteax"
+    static const char* const ops[6] = {
+        "tosltax", "tosultax",
+        "toslteax", "tosulteax",
+        "toslteeax", "tosulteeax"
     };
 
     unsigned Label;
@@ -4321,8 +4412,10 @@ void g_lt (unsigned flags, unsigned long val)
 void g_le (unsigned flags, unsigned long val)
 /* Test for less than or equal to */
 {
-    static const char* const ops[4] = {
-        "tosleax", "tosuleax", "tosleeax", "tosuleeax"
+    static const char* const ops[6] = {
+        "tosleax", "tosuleax",
+        "tosleeax", "tosuleeax",
+        "tosleeeax", "tosuleeeax"
     };
 
 
@@ -4436,8 +4529,10 @@ void g_le (unsigned flags, unsigned long val)
 void g_gt (unsigned flags, unsigned long val)
 /* Test for greater than */
 {
-    static const char* const ops[4] = {
-        "tosgtax", "tosugtax", "tosgteax", "tosugteax"
+    static const char* const ops[6] = {
+        "tosgtax", "tosugtax",
+        "tosgteax", "tosugteax",
+        "tosgteeax", "tosugteeax"
     };
 
 
@@ -4575,8 +4670,10 @@ void g_gt (unsigned flags, unsigned long val)
 void g_ge (unsigned flags, unsigned long val)
 /* Test for greater than or equal to */
 {
-    static const char* const ops[4] = {
-        "tosgeax", "tosugeax", "tosgeeax", "tosugeeax"
+    static const char* const ops[6] = {
+        "tosgeax", "tosugeax",
+        "tosgeeax", "tosugeeax",
+        "tosgeeeax", "tosugeeeax"
     };
 
     unsigned Label;
