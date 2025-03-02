@@ -145,12 +145,12 @@ void ShiftExpr (struct ExprDesc* Expr)
             */
             if (!ED_IsUneval (Expr)) {
                 if (Expr2.IVal < 0) {
-                    Warning ("Negative shift count %ld treated as %u for %s",
+                    Warning ("Negative shift count %lld treated as %u for %s",
                              Expr2.IVal,
                              (unsigned)Expr2.IVal & (ExprBits - 1),
                              GetBasicTypeName (ResultType));
                 } else if (Expr2.IVal >= (long) ExprBits) {
-                    Warning ("Shift count %ld >= width of %s treated as %u",
+                    Warning ("Shift count %lld >= width of %s treated as %u",
                              Expr2.IVal,
                              GetBasicTypeName (ResultType),
                              (unsigned)Expr2.IVal & (ExprBits - 1));
@@ -165,7 +165,7 @@ void ShiftExpr (struct ExprDesc* Expr)
                 Tok == TOK_SHR              &&
                 Expr2.IVal >= (long) Expr->Type->A.B.Width) {
                 if (!ED_IsUneval (Expr)) {
-                    Warning ("Right-shift count %ld >= width of bit-field", Expr2.IVal);
+                    Warning ("Right-shift count %lld >= width of bit-field", Expr2.IVal);
                 }
             }
 

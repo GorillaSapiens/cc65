@@ -151,7 +151,7 @@ static void ParseByteArg (StrBuf* T, unsigned Arg)
     }
 
     /* Convert into a hex number */
-    xsprintf (Buf, sizeof (Buf), "$%02lX", Expr.IVal & 0xFF);
+    xsprintf (Buf, sizeof (Buf), "$%02llX", (Expr.IVal & 0xFF));
 
     /* Add the number to the target buffer */
     SB_AppendStr (T, Buf);
@@ -184,7 +184,7 @@ static void ParseWordArg (StrBuf* T, unsigned Arg)
     }
 
     /* Convert into a hex number */
-    xsprintf (Buf, sizeof (Buf), "$%04lX", Expr.IVal & 0xFFFF);
+    xsprintf (Buf, sizeof (Buf), "$%04llX", Expr.IVal & 0xFFFF);
 
     /* Add the number to the target buffer */
     SB_AppendStr (T, Buf);
@@ -204,7 +204,7 @@ static void ParseLongArg (StrBuf* T, unsigned Arg attribute ((unused)))
     ExprDesc Expr = NoCodeConstAbsIntExpr (hie1);
 
     /* Convert into a hex number */
-    xsprintf (Buf, sizeof (Buf), "$%08lX", Expr.IVal & 0xFFFFFFFF);
+    xsprintf (Buf, sizeof (Buf), "$%08llX", Expr.IVal & 0xFFFFFFFF);
 
     /* Add the number to the target buffer */
     SB_AppendStr (T, Buf);
@@ -326,7 +326,7 @@ static void ParseStrArg (StrBuf* T, unsigned Arg attribute ((unused)))
 
         default:
             Expr = NoCodeConstAbsIntExpr (hie1);
-            xsprintf (Buf, sizeof (Buf), "%ld", Expr.IVal);
+            xsprintf (Buf, sizeof (Buf), "%lld", Expr.IVal);
             SB_AppendStr (T, Buf);
             break;
     }

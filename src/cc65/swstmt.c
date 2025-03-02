@@ -233,11 +233,11 @@ void CaseLabel (void)
             (IsSignSigned (CaseT) ? CaseVal < 0 : CaseExpr.IVal < 0))) {
             Warning (IsSignSigned (CaseT) ?
                      IsSignSigned (CaseExpr.Type) ?
-                     "Case value is implicitly converted (%ld to %ld)" :
-                     "Case value is implicitly converted (%ld to %lu)" :
+                     "Case value is implicitly converted (%ld to %lld)" :
+                     "Case value is implicitly converted (%ld to %llu)" :
                      IsSignSigned (CaseExpr.Type) ?
-                     "Case value is implicitly converted (%lu to %ld)" :
-                     "Case value is implicitly converted (%lu to %lu)",
+                     "Case value is implicitly converted (%lu to %lld)" :
+                     "Case value is implicitly converted (%lu to %llu)",
                      CaseVal, CaseExpr.IVal);
         }
 

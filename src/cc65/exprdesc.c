@@ -558,7 +558,7 @@ void PrintExprDesc (FILE* F, ExprDesc* E)
         fprintf (F, "Type:     (unknown)\n"
                     "Raw type: (unknown)\n");
     }
-    fprintf (F, "IVal:     0x%08lX\n", E->IVal);
+    fprintf (F, "IVal:     0x%08llX\n", E->IVal);
     fprintf (F, "FVal:     %f\n", FP_D_ToFloat (E->V.FVal));
 
     Flags = E->Flags;

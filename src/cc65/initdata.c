@@ -575,9 +575,9 @@ static unsigned ParseStructInit (Type* T, int* Braces, int AllowFlexibleMembers)
                 if (Field.IVal < 0 || (unsigned long) Field.IVal != Val) {
                     Warning (IsSignUnsigned (Field.Type) ?
                              "Implicit truncation from '%s' to '%s : %u' in bit-field initializer"
-                             " changes value from %lu to %lu" :
+                             " changes value from %llu to %lu" :
                              "Implicit truncation from '%s' to '%s : %u' in bit-field initializer"
-                             " changes value from %ld to %lu",
+                             " changes value from %lld to %lu",
                              GetFullTypeName (Field.Type), GetFullTypeName (TagSym->Type),
                              TagSym->Type->A.B.Width, Field.IVal, Val);
                 }
@@ -588,9 +588,9 @@ static unsigned ParseStructInit (Type* T, int* Braces, int AllowFlexibleMembers)
                 if (Field.IVal != RestoredVal) {
                     Warning (IsSignUnsigned (Field.Type) ?
                              "Implicit truncation from '%s' to '%s : %u' in bit-field initializer"
-                             " changes value from %lu to %ld" :
+                             " changes value from %llu to %ld" :
                              "Implicit truncation from '%s' to '%s : %u' in bit-field initializer"
-                             " changes value from %ld to %ld",
+                             " changes value from %lld to %ld",
                              GetFullTypeName (Field.Type), GetFullTypeName (TagSym->Type),
                              TagSym->Type->A.B.Width, Field.IVal, RestoredVal);
                 }

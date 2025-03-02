@@ -335,12 +335,12 @@ static void OpAssignBitField (const GenDesc* Gen, ExprDesc* Expr, const char* Op
                         ** the standard.
                         */
                         if (Expr2.IVal < 0) {
-                            Warning ("Negative shift count %ld treated as %u for %s",
+                            Warning ("Negative shift count %lld treated as %u for %s",
                                      Expr2.IVal,
                                      (unsigned)Expr2.IVal & (ExprBits - 1),
                                      GetBasicTypeName (CalType));
                         } else if (Expr2.IVal >= (long)ExprBits) {
-                            Warning ("Shift count %ld >= width of %s treated as %u",
+                            Warning ("Shift count %lld >= width of %s treated as %u",
                                      Expr2.IVal,
                                      GetBasicTypeName (CalType),
                                      (unsigned)Expr2.IVal & (ExprBits - 1));
@@ -351,7 +351,7 @@ static void OpAssignBitField (const GenDesc* Gen, ExprDesc* Expr, const char* Op
 
                         /* Additional check for bit-fields */
                         if (Expr2.IVal >= (long)Expr->Type->A.B.Width) {
-                            Warning ("Shift count %ld >= width of bit-field", Expr2.IVal);
+                            Warning ("Shift count %lld >= width of bit-field", Expr2.IVal);
                         }
                     }
                 }
@@ -544,12 +544,12 @@ static void OpAssignArithmetic (const GenDesc* Gen, ExprDesc* Expr, const char* 
                         ** the standard.
                         */
                         if (Expr2.IVal < 0) {
-                            Warning ("Negative shift count %ld treated as %u for %s",
+                            Warning ("Negative shift count %lld treated as %u for %s",
                                      Expr2.IVal,
                                      (unsigned)Expr2.IVal & (ExprBits - 1),
                                      GetBasicTypeName (CalType));
                         } else if (Expr2.IVal >= (long)ExprBits) {
-                            Warning ("Shift count %ld >= width of %s treated as %u",
+                            Warning ("Shift count %lld >= width of %s treated as %u",
                                      Expr2.IVal,
                                      GetBasicTypeName (CalType),
                                      (unsigned)Expr2.IVal & (ExprBits - 1));
@@ -560,7 +560,7 @@ static void OpAssignArithmetic (const GenDesc* Gen, ExprDesc* Expr, const char* 
 
                         /* Additional check for bit width */
                         if (Expr2.IVal >= (long)BitSizeOf (Expr->Type)) {
-                            Warning ("Shift count %ld >= width of %s",
+                            Warning ("Shift count %lld >= width of %s",
                                      Expr2.IVal, GetBasicTypeName (Expr->Type));
                         }
                     }
