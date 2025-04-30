@@ -462,6 +462,7 @@ static void CharConst (void)
     /* Translate into target charset */
     NextTok.IVal = SignExtendChar (C);
 
+    fprintf(stderr, "CharConst returns %02x\n", C); // TODO FIX remove this line
     /* Character constants have type int */
     NextTok.Type = type_int;
 }

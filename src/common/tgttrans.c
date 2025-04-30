@@ -34,6 +34,7 @@
 
 
 #include <string.h>
+#include <stdio.h> // TODO FIX remove this line
 
 /* common */
 #include "check.h"
@@ -130,6 +131,7 @@ void TgtTranslateSet (unsigned Index, unsigned char C)
 /* Set the translation code for the given character */
 {
     CHECK (Index < sizeof (Tab));
+    fprintf(stderr, "TgtTranslateSet %02x %02x\n", Index, C); // TODO FIX remove this line
     Tab[Index] = C;
 }
 
