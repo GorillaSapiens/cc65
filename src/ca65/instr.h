@@ -117,18 +117,18 @@
 /* Description for one instruction */
 typedef struct InsDesc InsDesc;
 struct InsDesc {
-    char                Mnemonic[5];
-    unsigned long       AddrMode;               /* Valid adressing modes */
-    unsigned char       BaseCode;               /* Base opcode */
-    unsigned char       ExtCode;                /* Number of ext code table */
-    void                (*Emit) (const InsDesc*);/* Handler function */
+    const char* const   Mnemonic;
+    const unsigned long AddrMode;                     /* Valid adressing modes */
+    const unsigned char BaseCode;                     /* Base opcode */
+    const unsigned char ExtCode;                      /* Number of ext code table */
+    void        (*const Emit) (const InsDesc* const); /* Handler function */
 };
 
 /* An instruction table */
 typedef struct InsTable InsTable;
 struct InsTable {
-    unsigned            Count;                  /* Number of intstructions */
-    InsDesc             Ins[1];                 /* Varying length */
+    const unsigned            Count;                  /* Number of intstructions */
+    const InsDesc*      const Ins;                    /* Varying length */
 };
 
 /* The instruction table for the currently active CPU */
