@@ -61,19 +61,19 @@
 */
 #define CF_NONE         0x0000  /* No special flags */
 
-/* Values for the actual type */
+/* Values for the actual type, indicative of size */
 #define CF_CHAR         0x0007  /* Operation on characters */
 #define CF_INT          0x0003  /* Operation on ints */
 #define CF_SHORT        CF_INT  /* Alias */
 #define CF_PTR          CF_INT  /* Alias for readability */
 #define CF_LONG         0x0001  /* Operation on longs */
-#define CF_FLOAT        0x0010  /* Operation on a float */
 
 /* Signedness */
 #define CF_UNSIGNED     0x0008  /* Value is unsigned */
+#define CF_FLOAT        0x0010  /* Operation on a float */
 
 /* Masks for retrieving type information */
-#define CF_TYPEMASK     0x0017  /* Type information */
+#define CF_TYPEMASK     0x0007  /* Type information */
 #define CF_STYPEMASK    0x001F  /* Includes signedness */
 
 #define CF_CONST        0x0040  /* Constant value available */

@@ -272,7 +272,7 @@ static void OpAssignBitField (const GenDesc* Gen, ExprDesc* Expr, const char* Op
 
     /* The rhs must be an integer (or a float, but we don't support that yet */
     if (!IsClassInt (Expr2.Type)) {
-        Error ("Invalid right operand for binary operator '%s'", Op);
+        Error ("Invalid right operand for binary operator '%s' (1)", Op);
         /* Continue. Wrong code will be generated, but the compiler won't
         ** break, so this is the best error recovery.
         */
@@ -497,7 +497,7 @@ static void OpAssignArithmetic (const GenDesc* Gen, ExprDesc* Expr, const char* 
 
         /* The rhs must be an integer (or a float, but we don't support that yet */
         if (!IsClassInt (Expr2.Type)) {
-            Error ("Invalid right operand for binary operator '%s'", Op);
+            Error ("Invalid right operand for binary operator '%s' (2)", Op);
             /* Continue. Wrong code will be generated, but the compiler won't
             ** break, so this is the best error recovery.
             */
@@ -617,7 +617,7 @@ void OpAssign (const GenDesc* Gen, ExprDesc* Expr, const char* Op)
 
     /* Only "=" accept struct/union */
     if (IsClassStruct (ltype) ? Gen != 0 : !IsScalarType (ltype)) {
-        Error ("Invalid left operand for binary operator '%s'", Op);
+        Error ("Invalid left operand for binary operator '%s' (1)", Op);
         /* Continue. Wrong code will be generated, but the compiler won't
         ** break, so this is the best error recovery.
         */
@@ -684,8 +684,8 @@ void OpAddSubAssign (const GenDesc* Gen, ExprDesc *Expr, const char* Op)
     }
 
     /* There must be an integer or pointer on the left side */
-    if (!IsClassInt (Expr->Type) && !IsTypePtr (Expr->Type)) {
-        Error ("Invalid left operand for binary operator '%s'", Op);
+    if (!IsClassInt(Expr->Type) && !IsClassPtr (Expr->Type) && !IsTypeFloat (Expr->Type)) {
+        Error ("Invalid left operand for binary operator '%s' (2)", Op);
         /* Continue. Wrong code will be generated, but the compiler won't
         ** break, so this is the best error recovery.
         */
@@ -712,12 +712,11 @@ void OpAddSubAssign (const GenDesc* Gen, ExprDesc *Expr, const char* Op)
     ED_Init (&Expr2);
     Expr2.Flags |= Expr->Flags & E_MASK_KEEP_SUBEXPR;
 
-    /* Evaluate the rhs. We expect an integer here, since float is not
-    ** supported
+    /* Evaluate the rhs.
     */
     hie1 (&Expr2);
-    if (!IsClassInt (Expr2.Type)) {
-        Error ("Invalid right operand for binary operator '%s'", Op);
+    if (!IsClassInt (Expr2.Type) && !IsClassFloat(Expr2.Type)) {
+        Error ("Invalid right operand for binary operator '%s' (3)", Op);
         /* Continue. Wrong code will be generated, but the compiler won't
         ** break, so this is the best error recovery.
         */

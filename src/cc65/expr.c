@@ -154,9 +154,10 @@ unsigned CG_TypeOf (const Type* T)
             return CF_LONG | CF_UNSIGNED;
 
         case T_FLOAT:
+            return CF_INT | CF_FLOAT;
+
         case T_DOUBLE:
-            /* These two are identical in the backend */
-            return CF_FLOAT;
+            return CF_LONG | CF_FLOAT;
 
         case T_FUNC:
             /* Treat this as a function pointer */
@@ -3212,7 +3213,7 @@ static void parsesub (ExprDesc* Expr)
 
     /* lhs cannot be function or pointer to function */
     if (IsTypeFuncLike (Expr->Type)) {
-        Error ("Invalid left operand for binary operator '-'");
+        Error ("Invalid left operand for binary operator '-' (0)");
         /* Make it pointer to char to avoid further errors */
         Expr->Type = type_uchar;
     }
@@ -3237,7 +3238,7 @@ static void parsesub (ExprDesc* Expr)
 
     /* rhs cannot be function or pointer to function */
     if (IsTypeFuncLike (Expr2.Type)) {
-        Error ("Invalid right operand for binary operator '-'");
+        Error ("Invalid right operand for binary operator '-' (0)");
         /* Make it pointer to char to avoid further errors */
         Expr2.Type = type_uchar;
     }
