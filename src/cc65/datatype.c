@@ -659,6 +659,25 @@ const Type* IntPromotion (const Type* T)
 
 
 
+const Type* FloatPromotion (const Type* T)
+/* Apply the float promotions to T and return the result. The returned type
+** string may be T if there is no need to change it.
+*/
+{
+    if (IsClassInt(T)) {
+        T = IntPromotion(T);
+    }
+
+    if (IsRankShort(T)) {
+        return type_float;
+    }
+    else {
+        return type_double;
+    }
+}
+
+
+
 const Type* ArithmeticConvert (const Type* lhst, const Type* rhst)
 /* Perform the usual arithmetic conversions for binary operators. */
 {
@@ -668,16 +687,34 @@ const Type* ArithmeticConvert (const Type* lhst, const Type* rhst)
     ** of the result. This pattern is called the usual arithmetic conversions.
     */
 
-    /* There are additional rules for floating point types that we don't bother with, since
-    ** floating point types are not (yet) supported.
-    ** The integral promotions are performed on both operands.
-    */
-    if (IsClassFloat(lhst) || IsClassFloat(rhst)) {
-        Error ("Floating point arithmetic not supported.");
-        return type_long;
+    if (IsClassInt(lhst)) {
+        lhst = IntPromotion (lhst);
     }
-    lhst = IntPromotion (lhst);
-    rhst = IntPromotion (rhst);
+    if (IsClassInt(rhst)) {
+        rhst = IntPromotion (rhst);
+    }
+
+    /* If either is a float class and the other and int, promote the int to a float class */
+    if (IsClassFloat(lhst) && !IsClassFloat(rhst)) {
+        rhst = FloatPromotion (rhst);
+    }
+    if (!IsClassFloat(lhst) && IsClassFloat(rhst)) {
+        lhst = FloatPromotion (lhst);
+    }
+
+    /* If one is a double, and the other is a float class, promote the other to double */
+    if (IsTypeDouble(lhst)) {
+        rhst = type_double;
+        return type_double;
+    }
+    if (IsTypeDouble(rhst)) {
+        lhst = type_double;
+        return type_double;
+    }
+
+    if (IsClassFloat(lhst)) {
+        return type_float;
+    }
 
     /* If either operand has type unsigned long int, the other operand is converted to
     ** unsigned long int.

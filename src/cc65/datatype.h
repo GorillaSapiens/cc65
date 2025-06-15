@@ -469,6 +469,11 @@ const Type* IntPromotion (const Type* T);
 ** string may be T if there is no need to change it.
 */
 
+const Type* FloatPromotion (const Type* T);
+/* Apply the float promotions to T and return the result. The returned type
+** string may be T if there is no need to change it.
+*/
+
 const Type* ArithmeticConvert (const Type* lhst, const Type* rhst);
 /* Perform the usual arithmetic conversions for binary operators. */
 

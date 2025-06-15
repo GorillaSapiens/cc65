@@ -58,8 +58,8 @@
 
 
 
-#define F_SIZE  sizeof(float)
-#define D_SIZE  sizeof(float)           /* NOT double! */
+#define F_SIZE  2
+#define D_SIZE  4
 
 
 
