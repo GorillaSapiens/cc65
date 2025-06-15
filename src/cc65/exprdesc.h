@@ -206,8 +206,8 @@ struct ExprDesc {
     uintptr_t           Name;           /* Name pointer or label number */
     struct SymEntry*    Sym;            /* Symbol table entry if any */
     long                IVal;           /* Integer value if expression constant */
+    double              FVal;           /* Floating point value */
     union {
-        Double          FVal;           /* Floating point value */
         struct Literal* LVal;           /* Literal value */
     } V;
 

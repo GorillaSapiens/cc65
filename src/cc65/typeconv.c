@@ -127,9 +127,9 @@ static void DoConversion (ExprDesc* Expr, const Type* NewType, int Explicit)
         ** and warn if precision is discarded.
         */
         if (IsClassFloat (OldType) && IsClassInt (NewType)) {
-            long IVal = (long)Expr->V.FVal.V;
-            if ((Expr->V.FVal.V != FP_D_FromInt(IVal).V) && !Explicit) {
-                Warning ("Floating point constant (%f) converted to integer loses precision (%ld)",Expr->V.FVal.V,IVal);
+            long IVal = (long)Expr->FVal;
+            if ((Expr->FVal != FP_D_FromInt(IVal).V) && !Explicit) {
+                Warning ("Floating point constant (%f) converted to integer loses precision (%ld)",Expr->FVal,IVal);
             }
             Expr->IVal = IVal;
         }

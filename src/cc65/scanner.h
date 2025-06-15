@@ -215,7 +215,7 @@ struct Token {
     token_t         Tok;        /* The token itself */
     long            IVal;       /* The integer attribute */
     int             Cooked;     /* The "cooked" flag for char constants */
-    Double          FVal;       /* The float attribute */
+    double          FVal;       /* The float attribute */
     struct Literal* SVal;       /* String literal is any */
     ident           Ident;      /* Identifier if IDENT */
     LineInfo*       LI;         /* Source line where the token comes from */

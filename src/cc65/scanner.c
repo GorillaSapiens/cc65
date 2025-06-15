@@ -547,6 +547,85 @@ ExitPoint:
 
 
 
+/* TODO FIX: this is dark magic, with manu assumptions !!! */
+
+/* native */
+#define N_FRACTION_BITS 52
+#define N_FRACTION_MASK ((1LL << N_FRACTION_BITS) - 1)
+#define N_EXPONENT_BITS 11
+#define N_EXPONENT_MASK (((1LL << N_EXPONENT_BITS) - 1) << N_FRACTION_BITS)
+#define N_BIAS 1023
+
+/* target float */
+#define TF_FRACTION_BITS 10
+#define TF_FRACTION_MASK ((1 << TF_FRACTION_BITS) - 1)
+#define TF_EXPONENT_BITS 5
+#define TF_EXPONENT_MASK (((1 << TF_EXPONENT_BITS) - 1) << TF_FRACTION_BITS)
+#define TF_BIAS 15
+
+/* target double */
+#define TD_FRACTION_BITS 23
+#define TD_FRACTION_MASK ((1L << TD_FRACTION_BITS) - 1)
+#define TD_EXPONENT_BITS 8
+#define TD_EXPONENT_MASK (((1L << TD_EXPONENT_BITS) - 1) << TD_FRACTION_BITS)
+#define TD_BIAS 127
+
+static int MakeTargetFloat(double arg) {
+    unsigned long long raw = *((unsigned long long *) &arg);
+    char sign = raw >> (N_FRACTION_BITS + N_EXPONENT_BITS);
+    unsigned long long fraction = raw & N_FRACTION_MASK;
+    int exponent = ((raw & N_EXPONENT_MASK) >> N_FRACTION_BITS) - N_BIAS;
+
+    int result = 0;
+
+    if ((exponent > TF_BIAS) || (exponent < (-TF_BIAS - 1))) {
+        Error ("Floating constant exponent is out of range for Float");
+    }
+
+    if (arg == 0.0) {
+        return 0;
+    }
+
+    fraction >>= (N_FRACTION_BITS - TF_FRACTION_BITS);
+    exponent += TF_BIAS;
+
+    result |= sign << (TF_FRACTION_BITS + TF_EXPONENT_BITS);
+    result |= exponent << (TF_FRACTION_BITS);
+    result |= fraction;
+
+    return result;
+}
+
+
+
+static int MakeTargetDouble(double arg) {
+    unsigned long long raw = *((unsigned long long *) &arg);
+    char sign = raw >> (N_FRACTION_BITS + N_EXPONENT_BITS);
+    unsigned long long fraction = raw & N_FRACTION_MASK;
+    int exponent = ((raw & N_EXPONENT_MASK) >> N_FRACTION_BITS) - N_BIAS;
+
+    int result = 0;
+
+    if ((exponent > TD_BIAS) || (exponent < (-TD_BIAS - 1))) {
+        Error ("Floating constant exponent is out of range for Double");
+    }
+
+    if (arg == 0.0) {
+        return 0;
+    }
+
+    fraction >>= (N_FRACTION_BITS - TD_FRACTION_BITS);
+    exponent += TD_BIAS;
+
+    result |= sign << (TD_FRACTION_BITS + TD_EXPONENT_BITS);
+    result |= exponent << (TD_FRACTION_BITS);
+    result |= fraction;
+
+    return result;
+}
+
+
+
 static void NumericConst (void)
 /* Parse a numeric constant token */
 {
@@ -810,6 +889,7 @@ static void NumericConst (void)
             SB_Skip (&Src);
             NextTok.Type = type_float;
             NextTok.Tok  = TOK_FCONST;
+            NextTok.IVal = MakeTargetFloat(FVal.V);
         } else {
             if (SB_Peek (&Src) != '\0') {
                 Error ("Invalid suffix \"%s\" on floating constant",
@@ -817,9 +897,10 @@ static void NumericConst (void)
             }
             NextTok.Type = type_double;
             NextTok.Tok  = TOK_DCONST;
+            NextTok.IVal = MakeTargetDouble(FVal.V);
         }
 fprintf(stderr, "%s:%d %f\n", __FILE__, __LINE__, FVal.V); // TODO FIX remove this line
-        NextTok.FVal = FVal;
+        NextTok.FVal = FVal.V;
     }
 
     /* We don't need the string buffer any longer */

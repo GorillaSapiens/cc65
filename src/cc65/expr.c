@@ -1373,7 +1373,8 @@ static void Primary (ExprDesc* E)
         case TOK_FCONST:
         case TOK_DCONST:
             /* Floating point constant */
-            E->V.FVal = CurTok.FVal;
+            E->FVal   = CurTok.FVal;
+            E->IVal   = CurTok.IVal; /* sneaky !!! */
             E->Flags  = E_LOC_NONE | E_RTYPE_RVAL;
             E->Type   = CurTok.Type;
             NextToken ();
@@ -1923,7 +1924,7 @@ static void UnaryOp (ExprDesc* Expr)
 
         if (IsClassFloat (Expr->Type)) {
             switch (Tok) {
-                case TOK_MINUS: Expr->V.FVal = FP_D_Sub(FP_D_Make(0.0),Expr->V.FVal);               break;
+                case TOK_MINUS: Expr->FVal = -Expr->FVal;                                           break;
                 case TOK_PLUS:                                                                      break;
                 case TOK_COMP:  Error ("Unary ~ operator not valid for floating point constant");   break;
                 default:        Internal ("Unexpected token: %d", Tok);

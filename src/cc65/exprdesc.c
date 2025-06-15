@@ -559,7 +559,7 @@ void PrintExprDesc (FILE* F, ExprDesc* E)
                     "Raw type: (unknown)\n");
     }
     fprintf (F, "IVal:     0x%08lX\n", E->IVal);
-    fprintf (F, "FVal:     %f\n", FP_D_ToFloat (E->V.FVal));
+    fprintf (F, "FVal:     %f\n", E->FVal);
 
     Flags = E->Flags;
     Sep   = '(';

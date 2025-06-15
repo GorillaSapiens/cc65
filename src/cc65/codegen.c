@@ -4494,10 +4494,12 @@ void g_defdata (unsigned flags, uintptr_t val, long offs)
                 break;
 
             case CF_INT:
+fprintf(stderr, "%s:%d %ld\n", __FILE__, __LINE__, val); // TODO FIX remove this line
                 AddDataLine ("\t.word\t$%04"PRIXPTR, val & 0xFFFF);
                 break;
 
             case CF_LONG:
+fprintf(stderr, "%s:%d %ld\n", __FILE__, __LINE__, val); // TODO FIX remove this line
                 AddDataLine ("\t.dword\t$%08"PRIXPTR, val & 0xFFFFFFFF);
                 break;
 
