@@ -126,6 +126,7 @@ static void PPhiePrimary (PPExpr* Expr)
             break;
 
         case TOK_FCONST:
+        case TOK_DCONST:
             /* Floating point constant */
             PPError ("Floating constant in preprocessor expression");
             Expr->IVal = 0;

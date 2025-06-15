@@ -187,6 +187,7 @@ typedef enum token_t {
     TOK_CCONST,
     TOK_WCCONST,
     TOK_FCONST,
+    TOK_DCONST,
     TOK_SCONST,
     TOK_WCSCONST,
     TOK_IDENT,

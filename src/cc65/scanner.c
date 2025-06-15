@@ -809,18 +809,17 @@ static void NumericConst (void)
         if (toupper (SB_Peek (&Src)) == 'F') {
             SB_Skip (&Src);
             NextTok.Type = type_float;
+            NextTok.Tok  = TOK_FCONST;
         } else {
             if (SB_Peek (&Src) != '\0') {
                 Error ("Invalid suffix \"%s\" on floating constant",
                        SB_GetConstBuf (&Src) + SB_GetIndex (&Src));
             }
             NextTok.Type = type_double;
+            NextTok.Tok  = TOK_DCONST;
         }
-
-        /* Set the value and the token */
+fprintf(stderr, "%s:%d %f\n", __FILE__, __LINE__, FVal.V); // TODO FIX remove this line
         NextTok.FVal = FVal;
-        NextTok.Tok  = TOK_FCONST;
-
     }
 
     /* We don't need the string buffer any longer */

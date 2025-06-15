@@ -1371,6 +1371,7 @@ static void Primary (ExprDesc* E)
             break;
 
         case TOK_FCONST:
+        case TOK_DCONST:
             /* Floating point constant */
             E->V.FVal = CurTok.FVal;
             E->Flags  = E_LOC_NONE | E_RTYPE_RVAL;
