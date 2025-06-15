@@ -899,7 +899,6 @@ static void NumericConst (void)
             NextTok.Tok  = TOK_DCONST;
             NextTok.IVal = MakeTargetDouble(FVal.V);
         }
-fprintf(stderr, "%s:%d %f\n", __FILE__, __LINE__, FVal.V); // TODO FIX remove this line
         NextTok.FVal = FVal.V;
     }
 
