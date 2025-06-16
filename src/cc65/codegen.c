@@ -1426,6 +1426,7 @@ unsigned g_typeadjust (unsigned lhs, unsigned rhs)
 
     /* Check if a conversion is needed */
     if (ltype == CF_LONG && rtype != CF_LONG && (rhs & CF_CONST) == 0) {
+fprintf(stderr, "%s:%d\n", __FILE__, __LINE__); // TODO FIX remove this line
         /* We must promote the primary register to long */
         g_reglong (rhs);
     } else if (ltype != CF_LONG && (lhs & CF_CONST) == 0 && rtype == CF_LONG) {
@@ -2342,17 +2343,23 @@ static void oper (unsigned Flags, unsigned long Val, const char* const* Subs)
 **      5       --> Operate on doubles
 */
 {
+fprintf(stderr, "%s:%d begin\n", __FILE__, __LINE__); // TODO FIX remove this line
     /* Determine the offset into the array */
     if (Flags & CF_UNSIGNED) {
+fprintf(stderr, "%s:%d +1\n", __FILE__, __LINE__); // TODO FIX remove this line
         ++Subs;
     }
     else if (Flags & CF_FLOAT) {
+fprintf(stderr, "%s:%d +2\n", __FILE__, __LINE__); // TODO FIX remove this line
         Subs += 2;
     }
 
     if ((Flags & CF_TYPEMASK) == CF_LONG) {
+fprintf(stderr, "%s:%d +3\n", __FILE__, __LINE__); // TODO FIX remove this line
         Subs += 3;
     }
+
+fprintf(stderr, "%s:%d %s\n", __FILE__, __LINE__, *Subs); // TODO FIX remove this line
 
     /* NULL subs indicates operation not permitted */
     if (*Subs == NULL) {
@@ -2665,6 +2672,7 @@ void g_add (unsigned flags, unsigned long val)
     static const char* const ops[6] = {
         "tosaddax", "tosaddax", "tosfaddax", "tosaddeax", "tosaddeax", "tosdaddeax"
     };
+fprintf(stderr, "%s:%d %08x\n", __FILE__, __LINE__, flags); // TODO FIX remove this line
 
     if (flags & CF_CONST) {
         flags &= ~CF_FORCECHAR; /* Handle chars as ints */

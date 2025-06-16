@@ -83,7 +83,7 @@ void ShiftExpr (struct ExprDesc* Expr)
 
         /* All operators that call this function expect an int on the lhs */
         if (!IsClassInt (Expr->Type)) {
-            Error ("Integer expression expected");
+            Error ("Integer expression expected (3)");
             ED_MakeConstAbsInt (Expr, 1);
         }
 
@@ -120,7 +120,7 @@ void ShiftExpr (struct ExprDesc* Expr)
 
         /* Check the type of the rhs */
         if (!IsClassInt (Expr2.Type)) {
-            Error ("Integer expression expected");
+            Error ("Integer expression expected (4)");
             ED_MakeConstAbsInt (&Expr2, 1);
         }
 

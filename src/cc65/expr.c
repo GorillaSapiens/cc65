@@ -2161,7 +2161,7 @@ static void hie_internal (const GenDesc* Ops,   /* List of generators */
 
         /* All operators that call this function expect an int on the lhs */
         if (!IsClassInt (Expr->Type)) {
-            Error ("Integer expression expected");
+            Error ("Integer expression expected (1)");
             /* To avoid further errors, make Expr a valid int expression */
             ED_MakeConstAbsInt (Expr, 1);
         }
@@ -2202,7 +2202,7 @@ static void hie_internal (const GenDesc* Ops,   /* List of generators */
 
         /* Check the type of the rhs */
         if (!IsClassInt (Expr2.Type)) {
-            Error ("Integer expression expected");
+            Error ("Integer expression expected (2)");
         }
 
         /* Check for const operands */
@@ -3120,7 +3120,9 @@ static void parseadd (ExprDesc* Expr, int DoArrayRef)
                 /* Operate on pointers, result type is a pointer */
                 flags = CF_PTR;
                 Expr->Type = Expr2.Type;
-            } else if (!DoArrayRef && IsClassInt (lhst) && IsClassInt (rhst)) {
+            } else if (!DoArrayRef &&
+                       (IsClassInt (lhst) || IsClassFloat (lhst)) &&
+                       (IsClassInt (rhst) || IsClassFloat(rhst))) {
                 /* Integer addition */
                 /* Load rhs into the primary */
                 LoadExpr (CF_NONE, &Expr2);
@@ -3179,7 +3181,7 @@ static void parseadd (ExprDesc* Expr, int DoArrayRef)
         ConsumeRBrack ();
     } else {
         if (AddDone < 0) {
-            Error ("Invalid operands for binary operator '+'");
+            Error ("Invalid operands for binary operator '+' (1)");
         } else {
             /* Array and function types must be converted to pointer types */
             Expr->Type = StdConversion (Expr->Type);
@@ -3345,7 +3347,7 @@ static void parsesub (ExprDesc* Expr)
                 /* Integer subtraction. We'll adjust the types later */
             } else {
                 /* OOPS */
-                Error ("Invalid operands for binary operator '-'");
+                Error ("Invalid operands for binary operator '-' (2)");
             }
 
             /* We can't make all subtraction expressions constant */
@@ -3407,7 +3409,7 @@ static void parsesub (ExprDesc* Expr)
                 /* Integer subtraction. We'll adjust the types later */
             } else {
                 /* OOPS */
-                Error ("Invalid operands for binary operator '-'");
+                Error ("Invalid operands for binary operator '-' (3)");
                 flags = CF_INT;
             }
 
@@ -3453,7 +3455,7 @@ static void parsesub (ExprDesc* Expr)
             flags = typeadjust (Expr, &Expr2, 0);
         } else {
             /* OOPS */
-            Error ("Invalid operands for binary operator '-'");
+            Error ("Invalid operands for binary operator '-' (4)");
         }
 
         /* Generate code for the sub (the & is a hack here) */
